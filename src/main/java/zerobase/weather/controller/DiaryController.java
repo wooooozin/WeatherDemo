@@ -16,11 +16,12 @@ public class DiaryController {
         this.diaryService = diaryService;
     }
 
-    @PostMapping("/create/diary") // path 지정
+    @PostMapping("/create/diary")
+        // path 지정
     void createDairy(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestBody String text
-            ) {
+    ) {
         diaryService.createDiary(date, text);
     }
 
@@ -45,5 +46,12 @@ public class DiaryController {
             @RequestBody String text
     ) {
         diaryService.updateDiary(date, text);
+    }
+
+    @DeleteMapping("/delete/diary")
+    void deleteDiary(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        diaryService.deleteDiary(date);
     }
 }
