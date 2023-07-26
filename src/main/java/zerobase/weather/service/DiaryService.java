@@ -1,27 +1,94 @@
 package zerobase.weather.service;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import zerobase.weather.domain.Diary;
+import zerobase.weather.repository.DiaryRepository;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class DiaryService {
     @Value("${openweathermap.key}")
     private String apiKey;
+    private final DiaryRepository diaryRepository;
+
+    public DiaryService(DiaryRepository diaryRepository) {
+        this.diaryRepository = diaryRepository;
+    }
 
     public void createDiary(LocalDate date, String text) {
-        // weather api 받아오기
-        getWeatherString();
-        // 받아온 날씨 데이터 파싱하기
-        // db에 저장하기
+        // weather api 받아오기 -> 날씨 데이터 가져오기
+        String weatherData = getWeatherString();
 
+        // 받아온 날씨 데이터(JSON) 파싱하기
+        Map<String, Object> parseWeather = parseWeather(weatherData);
+        // 파싱된 데이터 + 일기 값 -> db에 저장하기
+        Diary nowDiary = new Diary();
+        nowDiary.setWeather(parseWeather.get("main").toString());
+        nowDiary.setIcon(parseWeather.get("icon").toString());
+        nowDiary.setTemperature((Double) parseWeather.get("temp"));
+        nowDiary.setText(text);
+        nowDiary.setDate(date);
+        diaryRepository.save(nowDiary);
     }
 
     private String getWeatherString() {
         String apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=seoul&appid=" + apiKey;
-        System.out.println(apiUrl);
-        return "";
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection(); // 커넥션 만들어서
+            connection.setRequestMethod("GET"); // GET 요청
+            int responseCode = connection.getResponseCode(); // 리스폰스 코드 받아서
+            BufferedReader br;
+
+            if (responseCode == 200) { // 200 OK 성공이면
+                br = new BufferedReader(new InputStreamReader(connection.getInputStream())); // br에 추가
+            } else {
+                br = new BufferedReader(new InputStreamReader(connection.getErrorStream())); // 에러면 에러 추가
+            }
+
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = br.readLine()) != null) {
+                response.append(inputLine);
+            }
+            br.close();
+            return response.toString();
+        } catch (Exception e) {
+            return "failted to get response";
+        }
+    }
+
+    private Map<String, Object> parseWeather(String jsonString) {
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject;
+
+        try {
+            jsonObject = (JSONObject) jsonParser.parse(jsonString);
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> resultMap = new HashMap<>();
+
+        JSONArray weatherArray = (JSONArray) jsonObject.get("weather");
+        JSONObject weatherData = (JSONObject) weatherArray.get(0);
+        resultMap.put("main", weatherData.get("main"));
+        resultMap.put("icon", weatherData.get("icon"));
+
+        JSONObject mainData = (JSONObject) jsonObject.get("main");
+        resultMap.put("temp", mainData.get("temp"));
+        return resultMap;
     }
 }
