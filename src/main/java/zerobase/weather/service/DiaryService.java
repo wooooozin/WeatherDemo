@@ -4,7 +4,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import zerobase.weather.WeatherApplication;
 import zerobase.weather.domain.DateWeather;
 import zerobase.weather.domain.Diary;
-import zerobase.weather.error.InvalidDate;
 import zerobase.weather.repository.DateWeatherRepository;
 import zerobase.weather.repository.DiaryRepository;
 
@@ -44,7 +42,7 @@ public class DiaryService {
     }
     @Transactional
     @Scheduled(cron = "0 0 1 * * *")
-    public void saveWeatherDAte() {
+    public void saveWeatherDate() {
         dateWeatherRepository.save(getWeatherFromApi());
     }
 
@@ -80,7 +78,7 @@ public class DiaryService {
 
         if (dateWeatherListFromDB.size() == 0) {
             // 새로 api에서 가져와야한다.
-            // 정책상 현재 날씨 가져오기 또는 날씨 없이 일기 작성
+            // 정책상 현재 날씨 가져오기
             return getWeatherFromApi();
         } else {
             return dateWeatherListFromDB.get(0);

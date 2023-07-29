@@ -18,7 +18,7 @@ public class DiaryController {
         this.diaryService = diaryService;
     }
 
-    @ApiOperation(value = "일기 텍스트와 날씨를 이용해서 DB에 일기 저장", notes = "자세한 내용은 아래 사이틀 참고하세요")
+    @ApiOperation(value = "일기 텍스트와 날씨를 이용해서 DB에 일기 저장", notes = "자세한 내용은 아래 사이트를 참고하세요")
     @PostMapping("/create/diary")
         // path 지정
     void createDairy(
@@ -57,7 +57,7 @@ public class DiaryController {
         diaryService.updateDiary(date, text);
     }
 
-    @ApiOperation("선택한 날짜의 일기를 삭제 합니다.")
+    @ApiOperation("선택한 날짜의 모든 일기를 삭제 합니다.")
     @DeleteMapping("/delete/diary")
     void deleteDiary(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
