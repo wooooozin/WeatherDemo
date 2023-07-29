@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import zerobase.weather.WeatherApplication;
+import zerobase.weather.config.DateException;
 import zerobase.weather.domain.DateWeather;
 import zerobase.weather.domain.Diary;
 import zerobase.weather.repository.DateWeatherRepository;
 import zerobase.weather.repository.DiaryRepository;
+import zerobase.weather.type.ErrorCode;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -88,9 +90,7 @@ public class DiaryService {
 
     @Transactional(readOnly = true)
     public List<Diary> readDiary(LocalDate date) {
-//        if (date.isAfter(LocalDate.ofYearDay(3050, 1))) {
-////            throw new InvalidDate();
-//        }
+        validDateFormat(date);
         return diaryRepository.findAllByDate(date);
     }
 
@@ -156,5 +156,12 @@ public class DiaryService {
         JSONObject mainData = (JSONObject) jsonObject.get("main");
         resultMap.put("temp", mainData.get("temp"));
         return resultMap;
+    }
+
+    private void validDateFormat(LocalDate date) {
+        if (date.isAfter(LocalDate.of(3050, 1, 1))
+                || date.isBefore(LocalDate.of(1900, 1, 1))) {
+            throw new DateException(ErrorCode.DATE_TOO_FAR_TOO_PAST);
+        }
     }
 }
