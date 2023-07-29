@@ -17,7 +17,8 @@
  <br>
  <br>
  # 최종 구현 API 리스트
- - POST : /create/diary
+
+- POST : /create/diary
   -  date parameter 로 받아주세요. (date 형식 : yyyy-MM-dd)
   -  text parameter 로 일기 글을 받아주세요.
   -  외부 API 에서 받아온 날씨 데이터와 함께 DB에 저장해주세요.
