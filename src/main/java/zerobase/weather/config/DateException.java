@@ -6,11 +6,10 @@ import zerobase.weather.type.ErrorCode;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class DateException extends RuntimeException {
-    private ErrorCode errorCode;
-    private String errorMessage;
+    private final ErrorCode errorCode;
+    private final String errorMessage;
 
     public DateException(ErrorCode errorCode) {
         this.errorCode = errorCode;
